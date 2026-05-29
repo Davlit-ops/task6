@@ -1,0 +1,37 @@
+---
+- name : Update apt 
+  ansible.builtin.apt:
+    update_cache: yes
+
+- name: Install base tools
+  ansible.builtin.apt:
+    name:
+      - awscli
+      - fontconfig
+      - openjdk-21-jre
+      - gpg
+      - unzip
+    state: present
+
+- name: Download HashiCorp GPG key
+  ansible.builtin.get_url:
+    url: https://apt.releases.hashicorp.com/gpg
+    dest: /tmp/hashicorp.asc
+    mode: '0644'
+
+- name: Dearmor HashiCorp GPG key
+  ansible.builtin.command:
+    cmd: gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg /tmp/hashicorp.asc
+    creates: /usr/share/keyrings/hashicorp-archive-keyring.gpg
+
+- name: Add HashiCorp apt repository
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main"
+    filename: hashicorp
+    state: present
+
+- name: Install Terraform on Jenkins Master
+  ansible.builtin.apt:
+    name: terraform
+    state: present
+    update_cache: yes

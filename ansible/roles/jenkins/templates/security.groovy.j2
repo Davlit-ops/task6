@@ -1,0 +1,13 @@
+import jenkins.model.*
+import hudson.security.*
+
+def instance = Jenkins.getInstance()
+
+def hudsonRealm = new HudsonPrivateSecurityRealm(false)
+hudsonRealm.createAccount("admin", "{{ secretsmanager_output.stdout }}")
+instance.setSecurityRealm(hudsonRealm)
+
+def installState = jenkins.install.InstallState.INITIAL_SETUP_COMPLETED
+instance.getInstallState().initializeState(installState)
+
+instance.save()
